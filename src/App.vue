@@ -90,6 +90,14 @@ const getFaviconUrl = (domain) => {
   <div class="container">
     <div class="title">
       <h1>Hello 人 !</h1>
+      拖拽
+      搜索
+      编辑
+      删除
+      改变背景颜色
+      切换主题
+      参考 https://webportal.vercel.app/
+
     </div>
 
     <div class="search">
@@ -154,18 +162,13 @@ const getFaviconUrl = (domain) => {
 .container {
   width: 100vw;
   height: 100vh;
-  background-image: url("./assets/bg.jpg");
-  background-size: cover;
-  background-position: center;
-  color: #fff;
+  background: linear-gradient(to bottom, #f0f3f7, #3df7de);
   text-align: center;
-
-  overflow: hidden;
 }
 
 .title {
-  margin-top: 10vh;
-  font-size: 20px;
+  padding-top: 10vh;
+  font-size: 24px;
 }
 
 .search {
@@ -173,8 +176,8 @@ const getFaviconUrl = (domain) => {
 }
 
 .search input {
-  height: 50px;
-  width: 750px;
+  height: 48px;
+  width: 720px;
   border-radius: 25px;
   background-color: #fff;
   padding: 0 20px;
@@ -193,6 +196,11 @@ const getFaviconUrl = (domain) => {
   width: 100px;
   height: 120px;
 
+  background-color: rgba(0, 0, 0, 0.1);
+  margin: 10px;
+  border-radius: 6px;
+
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -207,7 +215,6 @@ const getFaviconUrl = (domain) => {
   width: 48px;
   height: 48px;
   border-radius: 25px;
-  background-color: #e1e3e1;
   margin-bottom: 5px;
   padding: 10px;
   display: flex;
