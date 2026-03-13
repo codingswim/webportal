@@ -1,8 +1,19 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { supabase } from "./supabase";
-import { ElLoading } from "element-plus";
+import {
+  ElLoading,
+  ElIcon,
+  ElButton,
+  ElInput,
+  ElForm,
+  ElFormItem,
+  ElDialog,
+} from "element-plus";
+import { Plus } from "@element-plus/icons-vue";
 import defaultFavicon from "./assets/portal.svg";
+import Header from "./components/Header/index.vue";
+import SearchInput from "./components/SearchInput/index.vue";
 
 const showModal = ref(false);
 const form = ref({
@@ -45,7 +56,7 @@ const saveWebsite = async () => {
 };
 
 onMounted(async () => {
-  await fetchList();
+  await fetchList(); // 恢复列表加载
 });
 
 const fetchList = async () => {
@@ -68,7 +79,6 @@ const fetchList = async () => {
 
 // 图片加载失败时隐藏图标
 const handleImageError = (e, id) => {
-  console.log("图片加载失败:", e.target.src);
   e.target.style.display = "none";
   failedIcons.value.push(id);
 };
@@ -88,21 +98,17 @@ const getFaviconUrl = (domain) => {
 
 <template>
   <div class="container">
+    <Header />
+
     <div class="title">
-      <h1>Hello 人 !</h1>
-      拖拽
-      搜索
-      编辑
-      删除
-      改变背景颜色
-      切换主题
-      参考 https://webportal.vercel.app/
-
+      <h1>{{ $t("message.title") }}</h1>
+      <!-- <p class="title-desc">
+        拖拽 搜索 编辑 删除 改变背景颜色 切换主题 参考 https://webportal.vercel.app/
+      </p> -->
     </div>
 
-    <div class="search">
-      <input type="text" placeholder="请输入搜索内容" />
-    </div>
+    <SearchInput />
+
 
     <div class="websites">
       <div
@@ -126,16 +132,23 @@ const getFaviconUrl = (domain) => {
 
       <!-- 新增快捷方式 -->
       <div class="website_item" @click="showModal = true">
-        <div class="website_icon" style="font-size: 26px">
-          <el-icon><Plus /></el-icon>
+        <div class="website_icon">
+          <el-icon size="26"><Plus /></el-icon>
         </div>
-        <div class="website_name">新增快捷方式</div>
+        <div class="website_name">
+          {{ $t("message.addShortcut") }}
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Element Plus 对话框 -->
-  <el-dialog v-model="showModal" title="添加快捷方式" width="512px" @close="closeModal">
+  <el-dialog
+    v-model="showModal"
+    title="添加快捷方式"
+    :width="isMobile ? '90%' : '512px'"
+    @close="closeModal"
+  >
     <el-form :model="form" label-width="80px">
       <el-form-item label="名称">
         <el-input v-model="form.name" placeholder="如：GitHub" />
@@ -159,74 +172,145 @@ const getFaviconUrl = (domain) => {
 </template>
 
 <style scoped>
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 容器样式 - 响应式基础 */
 .container {
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(to bottom, #f0f3f7, #3df7de);
+  min-height: 100vh;
+  width: 100%;
+  padding: 0 16px;
+  background: linear-gradient(to bottom, #8ebfff, #ffffff);
   text-align: center;
+  overflow-x: hidden;
 }
 
+/* 标题区域 */
 .title {
-  padding-top: 10vh;
-  font-size: 24px;
+  padding-top: 8vh;
+  margin-bottom: 24px;
 }
 
-.search {
-  margin-top: 5vh;
+.title h1 {
+  font-size: clamp(20px, 5vw, 28px); /* 响应式字体大小 */
+  margin-bottom: 8px;
 }
 
-.search input {
-  height: 48px;
-  width: 720px;
-  border-radius: 25px;
-  background-color: #fff;
-  padding: 0 20px;
+.title-desc {
+  font-size: clamp(12px, 3vw, 16px);
+  color: #666;
+  line-height: 1.4;
 }
 
+/* 网站列表容器 - 响应式布局 */
 .websites {
-  width: 1000px;
-  margin: 50px auto 0;
-
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  gap: 16px; /* 使用gap替代margin，更现代的布局方式 */
+  padding-bottom: 40px;
 }
 
+/* 网站项 - 响应式尺寸 */
 .website_item {
-  width: 100px;
-  height: 120px;
-
+  flex: 0 0 clamp(80px, 20vw, 100px); /* 最小80px，最大100px，中间自适应 */
+  height: clamp(100px, 25vw, 120px);
   background-color: rgba(0, 0, 0, 0.1);
-  margin: 10px;
-  border-radius: 6px;
-
-
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-.website_item:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
+.website_item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 图标容器 */
 .website_icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 25px;
-  margin-bottom: 5px;
-  padding: 10px;
+  width: clamp(40px, 10vw, 48px);
+  height: clamp(40px, 10vw, 48px);
+  border-radius: 50%;
+  margin-bottom: 8px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
+.favicon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 网站名称 */
 .website_name {
-  width: 90px;
+  width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: clamp(12px, 2.5vw, 14px);
+  color: #333;
+}
+
+/* 媒体查询 - 针对移动端优化 */
+@media (max-width: 768px) {
+  .title {
+    padding-top: 6vh;
+  }
+
+  .websites {
+    gap: 12px;
+  }
+
+  .website_item {
+    flex: 0 0 calc(25% - 12px); /* 移动端每行4个 */
+    height: 100px;
+  }
+
+  /* 适配更小的屏幕（手机） */
+  @media (max-width: 480px) {
+    .website_item {
+      flex: 0 0 calc(33.33% - 12px); /* 小屏每行3个 */
+    }
+
+    .search {
+      margin-bottom: 24px;
+    }
+
+    .title-desc {
+      font-size: 12px;
+    }
+  }
+}
+
+/* 修复Element Plus对话框在移动端的样式 */
+:deep(.el-dialog) {
+  margin: 0 auto;
+  max-width: 95%;
+}
+
+:deep(.el-dialog__body) {
+  padding: 16px;
+}
+
+:deep(.el-form-item__label) {
+  font-size: 14px;
+}
+
+:deep(.el-input) {
+  font-size: 14px;
 }
 </style>
