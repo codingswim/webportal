@@ -109,7 +109,6 @@ const getFaviconUrl = (domain) => {
 
     <SearchInput />
 
-
     <div class="websites">
       <div
         v-for="item in list"
@@ -145,27 +144,33 @@ const getFaviconUrl = (domain) => {
   <!-- Element Plus 对话框 -->
   <el-dialog
     v-model="showModal"
-    title="添加快捷方式"
+    :title="$t('message.addShortcut')"
     :width="isMobile ? '90%' : '512px'"
     @close="closeModal"
   >
     <el-form :model="form" label-width="80px">
-      <el-form-item label="名称">
-        <el-input v-model="form.name" placeholder="如：GitHub" />
+      <el-form-item :label="$t('message.name')">
+        <el-input v-model="form.name" :placeholder="$t('message.example') + '：GitHub'" />
       </el-form-item>
-      <el-form-item label="网址">
-        <el-input v-model="form.url" placeholder="如：https://github.com" />
+      <el-form-item :label="$t('message.url')">
+        <el-input
+          v-model="form.url"
+          :placeholder="$t('message.example') + '：https://github.com'"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="closeModal">取消</el-button>
+      <el-button style="padding: 0 16px" @click="closeModal">{{
+        $t("message.cancel")
+      }}</el-button>
       <el-button
         type="primary"
+        style="padding: 0 16px"
         @click="saveWebsite"
         :disabled="!form.name.trim() || !form.url.trim()"
         :loading="saveLoading"
       >
-        完成
+        {{ $t("message.save") }}
       </el-button>
     </template>
   </el-dialog>
@@ -184,7 +189,8 @@ const getFaviconUrl = (domain) => {
   min-height: 100vh;
   width: 100%;
   padding: 0 16px;
-  background: linear-gradient(to bottom, #8ebfff, #ffffff);
+  /* background: linear-gradient(to bottom, #8ebfff, #ffffff); */
+  background-color: #e8edf2;
   text-align: center;
   overflow-x: hidden;
 }
