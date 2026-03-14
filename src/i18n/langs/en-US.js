@@ -13,8 +13,15 @@ export default {
     pleaseInput: 'Please input',
     cancel: 'Cancel',
     save: 'Save',
+    saveSuccess: 'Save Success',
     name: 'Name',
     url: 'URL',
+    empty: 'No data',
     example: 'e.g.',
+
+    deleteSuccess: 'Delete Success',
+    deleteFailed: 'Delete Failed',
+    confirmDelete: 'Confirm Delete?',
+    confirm: 'Confirm',
   }
 };

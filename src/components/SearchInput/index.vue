@@ -1,11 +1,18 @@
 <script setup>
 import { useI18n } from "vue-i18n";
+import { useSearchStore } from "@/stores/search";
+
 const { t } = useI18n();
+const searchStore = useSearchStore();
 </script>
 
 <template>
   <div class="search">
-    <input type="text" :placeholder="t('message.pleaseInput')" />
+    <input
+      type="text"
+      v-model="searchStore.searchTerm"
+      :placeholder="t('message.pleaseInput')"
+    />
   </div>
 </template>
 
@@ -26,6 +33,13 @@ const { t } = useI18n();
   font-size: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   color: var(--text-color);
+}
 
+/* 响应式 移动端修改 search 的宽度 */
+@media (max-width: 768px) {
+  .search {
+    width: 90%;
+    margin: 0 auto 24px;
+  }
 }
 </style>

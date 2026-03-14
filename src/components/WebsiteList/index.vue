@@ -1,8 +1,7 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import { supabase } from "@/supabase";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import {
-  ElLoading,
+  ElMessage,
   ElIcon,
   ElButton,
   ElInput,
@@ -10,79 +9,44 @@ import {
   ElFormItem,
   ElDialog,
 } from "element-plus";
-import { Plus } from "@element-plus/icons-vue";
+import { Delete } from "@element-plus/icons-vue";
+import { useI18n } from "vue-i18n";
+import { useWebsiteStore } from "@/stores/website";
+import { useSearchStore } from "@/stores/search";
 import defaultFavicon from "@/assets/portal.svg";
 
-// 定义props
-const props = defineProps({
-  // 可以根据需要添加props
-});
+const { t } = useI18n();
 
-// 定义emits
-const emit = defineEmits([
-  // 可以根据需要添加事件
-]);
+const websiteStore = useWebsiteStore();
+const searchStore = useSearchStore();
 
+const isMobile = ref(window.innerWidth <= 768);
 const showModal = ref(false);
-const form = ref({
-  name: "",
-  url: "",
-});
+const form = ref({ name: "", url: "" });
 
-const list = ref([]);
 const saveLoading = ref(false);
 const failedIcons = ref([]); // 记录加载失败的图标 id
 
-const gotoWebsite = (item) => {
-  window.open(item.url, "_blank");
-};
+const filteredList = computed(() => {
+  return websiteStore.filteredList(searchStore.searchTerm);
+});
 
-const closeModal = () => {
-  showModal.value = false;
-  form.value = { name: "", url: "" };
-};
-
-const saveWebsite = async () => {
-  saveLoading.value = true;
-  try {
-    const res = await supabase.from("websites").insert([
-      {
-        name: form.value.name.trim(),
-        url: form.value.url.trim(),
-      },
-    ]);
-
-    if (!res.error) {
-      closeModal();
-      await fetchList();
-    }
-  } catch (error) {
-    console.error("保存快捷方式失败:", error);
-  } finally {
-    saveLoading.value = false;
-  }
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
 };
 
 onMounted(async () => {
-  await fetchList();
+  await websiteStore.fetchList();
+
+  window.addEventListener("resize", handleResize);
 });
 
-const fetchList = async () => {
-//   const loading = ElLoading.service({
-//     lock: true,
-//     text: "Loading",
-//     background: "rgba(0, 0, 0, 0.7)",
-//   });
-  try {
-    const res = await supabase.from("websites").select("*");
-    if (!res.error && res.status === 200) {
-      list.value = res.data;
-    }
-  } catch (error) {
-    console.error("获取快捷方式列表失败:", error);
-  } finally {
-    // loading.close();
-  }
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
+const gotoWebsite = (item) => {
+  window.open(item.url, "_blank");
 };
 
 // 图片加载失败时隐藏图标
@@ -102,77 +66,143 @@ const getFaviconUrl = (domain) => {
     return "";
   }
 };
+
+const deleteWebsite = async (id, e) => {
+  e.stopPropagation();
+
+  try {
+    await websiteStore.deleteWebsite(id);
+    ElMessage({
+      message: t("message.deleteSuccess"),
+      type: "success",
+    });
+  } catch (error) {
+    ElMessage({
+      message: t("message.deleteFailed") || "删除失败",
+      type: "error",
+    });
+  }
+};
+
+const handleSave = async () => {
+  saveLoading.value = true;
+  try {
+    await websiteStore.addWebsite({
+      name: form.value.name.trim(),
+      url: form.value.url.trim(),
+    });
+    ElMessage({
+      message: t("message.saveSuccess"),
+      type: "success",
+    });
+    closeModal();
+  } catch (error) {
+    ElMessage({
+      message: t("message.saveFailed") || "保存失败",
+      type: "error",
+    });
+  } finally {
+    saveLoading.value = false;
+  }
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  form.value = { name: "", url: "" };
+};
 </script>
 
 <template>
-  <div>
-    <div class="websites">
-      <div
-        v-for="item in list"
-        :key="item.id"
-        class="website_item"
-        @click="gotoWebsite(item)"
-      >
-        <div class="website_icon">
-          <img
-            v-if="!failedIcons.includes(item.id)"
-            :src="getFaviconUrl(item.url)"
-            alt=""
-            class="favicon"
-            @error="handleImageError($event, item.id)"
-          />
-          <img v-else :src="defaultFavicon" alt="" class="favicon" />
-        </div>
-        <div class="website_name">{{ item.name }}</div>
-      </div>
-
-      <div class="website_item" @click="showModal = true">
-        <div class="website_icon">
-          <el-icon size="26"><Plus /></el-icon>
-        </div>
-        <div class="website_name">
-          {{ $t("message.addShortcut") }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Element Plus 对话框 -->
-    <el-dialog
-      v-model="showModal"
-      :title="$t('message.addShortcut')"
-      :width="'512px'"
-      @close="closeModal"
+  <div class="websites">
+    <div
+      v-for="item in filteredList"
+      :key="item.id"
+      class="website_item"
+      @click="gotoWebsite(item)"
     >
-      <el-form :model="form" label-width="80px">
-        <el-form-item :label="$t('message.name')">
-          <el-input
-            v-model="form.name"
-            :placeholder="$t('message.example') + '：GitHub'"
-          />
-        </el-form-item>
-        <el-form-item :label="$t('message.url')">
-          <el-input
-            v-model="form.url"
-            :placeholder="$t('message.example') + '：https://github.com'"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button style="padding: 0 16px" @click="closeModal">{{
-          $t("message.cancel")
-        }}</el-button>
-        <el-button
-          type="primary"
-          style="padding: 0 16px"
-          @click="saveWebsite"
-          :disabled="!form.name.trim() || !form.url.trim()"
-          :loading="saveLoading"
-        >
-          {{ $t("message.save") }}
-        </el-button>
-      </template>
-    </el-dialog>
+      <el-popconfirm
+        class="box-item"
+        width="200px"
+        :title="$t('message.confirmDelete')"
+        placement="top-end"
+        @confirm="deleteWebsite(item.id, $event)"
+        :confirm-button-text="$t('message.confirm')"
+        :cancel-button-text="$t('message.cancel')"
+      >
+        <template #reference>
+          <el-icon class="del_icon" @click.stop><Delete /></el-icon>
+        </template>
+      </el-popconfirm>
+
+      <div class="website_icon">
+        <img
+          v-if="!failedIcons.includes(item.id)"
+          :src="getFaviconUrl(item.url)"
+          alt=""
+          class="favicon"
+          @error="handleImageError($event, item.id)"
+        />
+        <img v-else :src="defaultFavicon" alt="" class="favicon" />
+      </div>
+      <div class="website_name">{{ item.name }}</div>
+    </div>
+    <el-empty
+      v-if="filteredList.length === 0 && !websiteStore.loading"
+      :description="$t('message.empty')"
+      image-size="100"
+    />
   </div>
+
+  <div class="add_button" @click="showModal = true">
+    <el-button
+      type="primary"
+      circle
+      icon="plus"
+      size="large"
+      style="font-size: 24px"
+    ></el-button>
+  </div>
+
+  <!-- Element Plus 对话框 -->
+  <el-dialog
+    :title="$t('message.addShortcut')"
+    :width="isMobile ? '90%' : '512px'"
+    @close="closeModal"
+    v-model="showModal"
+    close-icon="false"
+    custom-class="custom-dialog"
+  >
+    <el-form :model="form" label-width="50px">
+      <el-form-item :label="$t('message.name')">
+        <el-input v-model="form.name" :placeholder="$t('message.example') + '：GitHub'" />
+      </el-form-item>
+      <el-form-item :label="$t('message.url')">
+        <el-input
+          v-model="form.url"
+          :placeholder="$t('message.example') + '：https://github.com'"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button
+        :style="{
+          padding: '0 16px',
+          display: saveLoading ? 'none' : 'inline-block',
+        }"
+        @click="closeModal"
+        >{{ $t("message.cancel") }}</el-button
+      >
+      <el-button
+        type="primary"
+        style="padding: 0 16px"
+        @click="handleSave"
+        :disabled="!form.name.trim() || !form.url.trim()"
+        :loading="saveLoading"
+      >
+        {{ $t("message.save") }}
+      </el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped>
@@ -180,7 +210,7 @@ const getFaviconUrl = (domain) => {
 .websites {
   text-align: center;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -202,14 +232,29 @@ const getFaviconUrl = (domain) => {
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
-}
+  position: relative;
+  width: clamp(80px, 20vw, 100px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-.website_item:hover {
-  /* 鼠标悬停时悬浮 */
-  transform: scale(1.05);
+  .del_icon {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 16px;
+    color: var(--text-color);
+    cursor: pointer;
+    opacity: 0;
+  }
 
-  /* 鼠标悬停时改变边框颜色 */
-  border-color: var(--primary-color);
+  &:hover {
+    /* 鼠标悬停时悬浮 */
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+
+    .del_icon {
+      opacity: 0.7;
+    }
+  }
 }
 
 /* 图标容器 */
@@ -234,8 +279,10 @@ const getFaviconUrl = (domain) => {
 .website_name {
   width: 90%;
   overflow: hidden;
+  /* 超出一行隐藏 不显示省略号 */
   text-overflow: ellipsis;
   white-space: nowrap;
+
   font-size: clamp(12px, 2.5vw, 14px);
   color: var(--text-color);
 }
@@ -249,31 +296,48 @@ const getFaviconUrl = (domain) => {
   .website_item {
     flex: 0 0 calc(25% - 12px); /* 移动端每行4个 */
     height: 100px;
+
+    /* 在移动端始终显示删除图标 */
+    .del_icon {
+      opacity: 0.6;
+    }
+
+    /* 移动端触摸效果 */
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  /* 修复Element Plus对话框在移动端的样式 */
+  :deep(.el-dialog) {
+    margin: 0 auto;
+    max-width: 95%;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 16px;
+  }
+
+  :deep(.el-form-item__label) {
+    font-size: 14px;
+  }
+
+  :deep(.el-input) {
+    font-size: 14px;
   }
 
   /* 适配更小的屏幕（手机） */
   @media (max-width: 480px) {
     .website_item {
-      flex: 0 0 calc(33.33% - 12px); /* 小屏每行3个 */
+      flex: 0 0 calc(33.33% - 20px); /* 小屏每行3个 */
     }
   }
 }
 
-/* 修复Element Plus对话框在移动端的样式 */
-:deep(.el-dialog) {
-  margin: 0 auto;
-  max-width: 95%;
-}
-
-:deep(.el-dialog__body) {
-  padding: 16px;
-}
-
-:deep(.el-form-item__label) {
-  font-size: 14px;
-}
-
-:deep(.el-input) {
-  font-size: 14px;
+.add_button {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  z-index: 1000;
 }
 </style>

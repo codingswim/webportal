@@ -13,8 +13,15 @@ export default {
     pleaseInput: '请输入',
     cancel: '取消',
     save: '保存',
+    saveSuccess: '保存成功',
     name: '名称',
     url: '网址',
+    empty: '暂无',
     example: '例如',
+
+    deleteSuccess: '删除成功',
+    deleteFailed: '删除失败',
+    confirmDelete: '确定删除吗？',
+    confirm: '确认',
   }
 };
