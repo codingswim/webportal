@@ -8,9 +8,8 @@ import SearchInput from "./components/SearchInput/index.vue";
 import WebsiteList from "./components/WebsiteList/index.vue";
 
 const websiteStore = useWebsiteStore();
-
 const { t, locale } = useI18n();
-// 根据当前时间获取问候语
+
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 6) {
@@ -25,8 +24,6 @@ const getGreeting = () => {
     return t("message.goodEvening");
   }
 };
-
-// 计算属性，用于响应式更新问候语
 const greeting = ref(getGreeting());
 
 // 监听语言变化，当语言切换时立即更新问候语
@@ -64,7 +61,6 @@ onMounted(() => {
   }, 60000); // 60秒 = 1分钟
 });
 </script>
-<!-- 拖拽 参考 https://webportal.vercel.app/ -->
 
 <template>
   <div class="container">

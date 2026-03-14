@@ -19,6 +19,8 @@ export default {
     empty: '暂无',
     example: '例如',
 
+    sortSuccess: '排序已保存',
+    sortFailed: '排序保存失敗，已恢復原順序',
     deleteSuccess: '刪除成功',
     deleteFailed: '刪除失敗',
     confirmDelete: '確認刪除嗎？',

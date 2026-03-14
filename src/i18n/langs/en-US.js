@@ -19,6 +19,8 @@ export default {
     empty: 'No data',
     example: 'e.g.',
 
+    sortSuccess: 'Sort Success',
+    sortFailed: 'Sort Failed, original order restored',
     deleteSuccess: 'Delete Success',
     deleteFailed: 'Delete Failed',
     confirmDelete: 'Confirm Delete?',

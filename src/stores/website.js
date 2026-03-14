@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/supabase'
-import { tr } from 'element-plus/es/locale/index.mjs'
 
 export const useWebsiteStore = defineStore('website', {
     state: () => ({
@@ -25,7 +24,7 @@ export const useWebsiteStore = defineStore('website', {
         async fetchList() {
             this.loading = true
             try {
-                const res = await supabase.from('websites').select('*')
+                const res = await supabase.from('websites').select('*').order('sort', { ascending: true })
                 if (!res.error && res.status === 200) {
                     this.list = res.data
                     this.empty = res.data.length === 0
@@ -38,9 +37,17 @@ export const useWebsiteStore = defineStore('website', {
             }
         },
 
-        async addWebsite(website) {
+        async addWebsite(form) {
             try {
-                const res = await supabase.from('websites').insert([website])
+                const maxSort = this.dataList.length > 0
+                    ? Math.max(...this.dataList.map(item => item.sort))
+                    : 0
+                const newItem = {
+                    name: form.name,
+                    url: form.url,
+                    sort: maxSort + 1
+                }
+                const res = await supabase.from('websites').insert([newItem])
                 if (!res.error) {
                     await this.fetchList()
                 }
@@ -65,6 +72,19 @@ export const useWebsiteStore = defineStore('website', {
                 console.error('删除快捷方式失败:', error)
                 throw error // 重新抛出错误，让组件捕获
             }
-        }
+        },
+
+        async updateSort() {
+            this.loading = true
+            const updateList = this.list.map((item, index) => ({
+                id: item.id,
+                sort: index + 1
+            }))
+            // 调用 RPC 函数更新排序s
+            const res = await supabase.rpc('update_website_sort', { sort_data: updateList }) // 调用 RPC 函数
+            if (res.error) throw res.error
+            this.loading = false
+            return true
+        },
     }
 })

@@ -14,6 +14,7 @@ import { useI18n } from "vue-i18n";
 import { useWebsiteStore } from "@/stores/website";
 import { useSearchStore } from "@/stores/search";
 import defaultFavicon from "@/assets/portal.svg";
+import Draggable from "vuedraggable";
 
 const { t } = useI18n();
 
@@ -110,42 +111,58 @@ const closeModal = () => {
   showModal.value = false;
   form.value = { name: "", url: "" };
 };
+
+const onDragEnd = async () => {
+  try {
+    await websiteStore.updateSort();
+    ElMessage.success(t("message.sortSuccess"));
+  } catch (e) {
+    ElMessage.error(t("message.sortFailed"));
+    await websiteStore.fetchList();
+  }
+};
 </script>
 
 <template>
-  <div class="websites">
-    <div
-      v-for="item in filteredList"
-      :key="item.id"
-      class="website_item"
-      @click="gotoWebsite(item)"
+  <div>
+    <Draggable
+      v-model="websiteStore.list"
+      item-key="id"
+      class="websites"
+      animation="200"
+      @end="onDragEnd"
     >
-      <el-popconfirm
-        class="box-item"
-        width="200px"
-        :title="$t('message.confirmDelete')"
-        placement="top-end"
-        @confirm="deleteWebsite(item.id, $event)"
-        :confirm-button-text="$t('message.confirm')"
-        :cancel-button-text="$t('message.cancel')"
-      >
-        <template #reference>
-          <el-icon class="del_icon" @click.stop><Delete /></el-icon>
-        </template>
-      </el-popconfirm>
+      <template #item="{ element: item }">
+        <div class="website_item" @click="gotoWebsite(item)">
+          <el-popconfirm
+            class="box-item"
+            width="200px"
+            :title="$t('message.confirmDelete')"
+            placement="top-end"
+            @confirm="deleteWebsite(item.id, $event)"
+            :confirm-button-text="$t('message.confirm')"
+            :cancel-button-text="$t('message.cancel')"
+          >
+            <template #reference>
+              <el-icon class="del_icon" @click.stop><Delete /></el-icon>
+            </template>
+          </el-popconfirm>
 
-      <div class="website_icon">
-        <img
-          v-if="!failedIcons.includes(item.id)"
-          :src="getFaviconUrl(item.url)"
-          alt=""
-          class="favicon"
-          @error="handleImageError($event, item.id)"
-        />
-        <img v-else :src="defaultFavicon" alt="" class="favicon" />
-      </div>
-      <div class="website_name">{{ item.name }}</div>
-    </div>
+          <div class="website_icon">
+            <img
+              v-if="!failedIcons.includes(item.id)"
+              :src="getFaviconUrl(item.url)"
+              alt=""
+              class="favicon"
+              @error="handleImageError($event, item.id)"
+            />
+            <img v-else :src="defaultFavicon" alt="" class="favicon" />
+          </div>
+          <div class="website_name">{{ item.name }}</div>
+        </div>
+      </template>
+    </Draggable>
+
     <el-empty
       v-if="filteredList.length === 0 && !websiteStore.loading"
       :description="$t('message.empty')"
@@ -339,5 +356,19 @@ const closeModal = () => {
   bottom: 50px;
   right: 50px;
   z-index: 1000;
+}
+
+/* 拖拽时鼠标变抓手 */
+.website_item {
+  cursor: grab;
+}
+.website_item:active {
+  cursor: grabbing;
+}
+
+/* 拖拽占位半透明 */
+:deep(.sortable-ghost) {
+  opacity: 0.5;
+  background: #f5f5f5;
 }
 </style>
