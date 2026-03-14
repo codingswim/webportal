@@ -31,7 +31,7 @@ import LangSwitch from "./LangSwitch/index.vue";
   line-height: clamp(60px, 10vw, 100px); /* 行高跟随高度 */
   display: flex;
   justify-content: space-between;
-  padding: 0 clamp(16px, 3vw, 32px); /* 响应式内边距 */
+  padding: 0 clamp(36px, 3vw, 48px); /* 响应式内边距 */
   position: relative;
   z-index: 10;
 }

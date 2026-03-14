@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 import { computed, onMounted } from "vue";
 
-const { t, locale } = useI18n();
+const { locale } = useI18n();
 
 // 响应式图标尺寸
 const iconSize = computed(() => {
@@ -26,7 +26,6 @@ onMounted(() => {
 
 <template>
   <div class="langs">
-    <!-- 语言切换 根据 localStorage 中的 lang 切换 -->
     <el-dropdown>
       <svg
         t="1773409874557"
@@ -45,21 +44,9 @@ onMounted(() => {
       </svg>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item
-            :class="{ active: locale.value === 'zh-CN' }"
-            @click="changeLang('zh-CN')"
-            >中文</el-dropdown-item
-          >
-          <el-dropdown-item
-            :class="{ active: locale.value === 'zh-TW' }"
-            @click="changeLang('zh-TW')"
-            >繁体中文</el-dropdown-item
-          >
-          <el-dropdown-item
-            :class="{ active: locale.value === 'en-US' }"
-            @click="changeLang('en-US')"
-            >English</el-dropdown-item
-          >
+          <el-dropdown-item @click="changeLang('zh-CN')">中文</el-dropdown-item>
+          <el-dropdown-item @click="changeLang('zh-TW')">繁体中文</el-dropdown-item>
+          <el-dropdown-item @click="changeLang('en-US')">English</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -82,7 +69,8 @@ onMounted(() => {
 /* 语言图标样式优化 */
 .langs_icon {
   display: block;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, fill 0.3s ease;
+  fill: var(--text-color);
 }
 
 .langs:hover {
@@ -91,12 +79,6 @@ onMounted(() => {
 
 .langs:hover .langs_icon {
   transform: rotate(5deg);
-}
-
-/* 激活的语言选项样式 */
-.active {
-  color: #409eff;
-  font-weight: 500;
 }
 
 /* 修复Element Plus下拉菜单样式 */

@@ -1,6 +1,4 @@
 <script setup>
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
 </script>
 <template>
   <div class="title">
@@ -16,15 +14,13 @@ const { t } = useI18n();
 }
 
 .title h1 {
-  font-size: clamp(24px, 5vw, 32px);
-  font-weight: 600;
-  color: #333;
+  font-size: clamp(16px, 5vw, 24px);
+  font-weight: 400;
 }
 
 .title .beta {
   font-size: clamp(12px, 2vw, 14px);
   font-weight: 400;
-  color: #999;
   margin-left: 8px;
 }
 </style>

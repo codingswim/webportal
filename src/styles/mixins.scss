@@ -1,0 +1,13 @@
+// 定义一个 flex 水平垂直居中的混入
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// 定义一个响应式混入
+@mixin on-mobile {
+  @media (max-width: $breakpoint-mobile) {
+    @content;
+  }
+}
