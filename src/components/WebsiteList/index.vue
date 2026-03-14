@@ -68,11 +68,11 @@ onMounted(async () => {
 });
 
 const fetchList = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: "Loading",
-    background: "rgba(0, 0, 0, 0.7)",
-  });
+//   const loading = ElLoading.service({
+//     lock: true,
+//     text: "Loading",
+//     background: "rgba(0, 0, 0, 0.7)",
+//   });
   try {
     const res = await supabase.from("websites").select("*");
     if (!res.error && res.status === 200) {
@@ -81,7 +81,7 @@ const fetchList = async () => {
   } catch (error) {
     console.error("获取快捷方式列表失败:", error);
   } finally {
-    loading.close();
+    // loading.close();
   }
 };
 
