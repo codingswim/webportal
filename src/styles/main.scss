@@ -1,8 +1,8 @@
 // 引入重置样式
-@import './reset/_reset.scss';
+@use "@/styles/reset/_reset.scss" as *;
 
 // 引入主题样式
-@import './themes/index.scss';
+@use "@/styles/themes/index.scss" as *;
 
 // 全局通用样式（使用 CSS 变量）
 body {

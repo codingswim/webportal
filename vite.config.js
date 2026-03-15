@@ -44,8 +44,8 @@ export default defineConfig({
       scss: {
         // 自动注入全局变量/混合器（多个文件用 ; 分隔）
         additionalData: `
-          @import "@/styles/variables.scss";
-          @import "@/styles/mixins.scss";
+          @use "@/styles/variables.scss" as *;
+          @use "@/styles/mixins.scss" as *;
         `,
         // 可选：指定 SCSS 文件的查找路径
         includePaths: [path.resolve(__dirname, 'src/styles')]

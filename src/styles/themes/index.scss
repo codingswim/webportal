@@ -1,6 +1,6 @@
 // 引入主题变量
-@use './_light.scss' as light;
-@use './_dark.scss' as dark;
+@use "@/styles/themes/_light.scss" as light;
+@use "@/styles/themes/_dark.scss" as dark;
 
 // 定义将 Sass map 转换为 CSS 变量的混合器
 @mixin set-theme-variables($theme-map) {
