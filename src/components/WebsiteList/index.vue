@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import {
   ElMessage,
   ElIcon,
@@ -28,9 +28,13 @@ const form = ref({ name: "", url: "" });
 const saveLoading = ref(false);
 const failedIcons = ref([]); // 记录加载失败的图标 id
 
-const filteredList = computed(() => {
-  return websiteStore.filteredList(searchStore.searchTerm);
-});
+watch(
+  () => searchStore.searchTerm,
+  (newTerm) => {
+    websiteStore.syncFilteredList(newTerm);
+  },
+  { immediate: true }
+);
 
 const handleResize = () => {
   isMobile.value = window.innerWidth <= 768;
@@ -126,11 +130,12 @@ const onDragEnd = async () => {
 <template>
   <div>
     <Draggable
-      v-model="websiteStore.list"
+      v-model="websiteStore.filteredList"
       item-key="id"
       class="websites"
       animation="200"
       @end="onDragEnd"
+      :disabled="searchStore.searchTerm"
     >
       <template #item="{ element: item }">
         <div class="website_item" @click="gotoWebsite(item)">
@@ -164,7 +169,7 @@ const onDragEnd = async () => {
     </Draggable>
 
     <el-empty
-      v-if="filteredList.length === 0 && !websiteStore.loading"
+      v-if="websiteStore.filteredList.length === 0 && !websiteStore.loading"
       :description="$t('message.empty')"
       image-size="100"
     />

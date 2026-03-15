@@ -1,9 +1,11 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 import { useSearchStore } from "@/stores/search";
+import { useWebsiteStore } from "@/stores/website";
 
 const { t } = useI18n();
 const searchStore = useSearchStore();
+const websiteStore = useWebsiteStore();
 </script>
 
 <template>
@@ -12,6 +14,8 @@ const searchStore = useSearchStore();
       type="text"
       v-model="searchStore.searchTerm"
       :placeholder="t('message.pleaseInput')"
+      @blur="websiteStore.syncFilteredList(searchStore.searchTerm)"
+      @clear="websiteStore.syncFilteredList('')"
     />
   </div>
 </template>
