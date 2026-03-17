@@ -1,5 +1,4 @@
-<script setup>
-</script>
+<script setup></script>
 <template>
   <div class="title">
     <h1>Portal</h1>
@@ -11,6 +10,7 @@
 <style scoped>
 .title {
   display: flex;
+  line-height: 56px;
 }
 
 .title h1 {

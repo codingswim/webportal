@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { supabase } from '@/supabase'
+import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
 
 export const useWebsiteStore = defineStore('website', () => {
@@ -24,17 +24,39 @@ export const useWebsiteStore = defineStore('website', () => {
         const res = await supabase.from('websites').select('*').order('sort', { ascending: true })
         if (!res.error && res.status === 200) {
             list.value = res.data
+            filteredList.value = res.data
         }
-        syncFilteredList('')
+        loading.value = false
+    }
+
+    const addWebsite = async (data) => {
+        loading.value = true
+        let newWebsite = {
+            ...data,
+            sort: list.value.length + 1
+        }
+        const res = await supabase.from('websites').insert([{ ...newWebsite }])
+        if (!res.error) {
+            const resList = await supabase.from('websites').select('*').order('sort', { ascending: true })
+            if (!resList.error) {
+                list.value = resList.data
+                filteredList.value = resList.data
+            }
+        }
         loading.value = false
     }
 
     const deleteWebsite = async (id) => {
+        loading.value = true
         const res = await supabase.from('websites').delete().eq('id', id)
-        if (!res.error && res.status === 200) {
-            list.value = list.value.filter(item => item.id !== id)
+        if (!res.error) {
+            const resList = await supabase.from('websites').select('*').order('sort', { ascending: true })
+            if (!resList.error) {
+                list.value = resList.data
+                filteredList.value = resList.data
+            }
         }
-        syncFilteredList(searchTerm.value)
+        loading.value = false
     }
 
     const updateSort = async () => {
@@ -55,6 +77,7 @@ export const useWebsiteStore = defineStore('website', () => {
         loading,
 
         fetchList,
+        addWebsite,
         deleteWebsite,
         updateSort,
         syncFilteredList // 对外暴露同步筛选的方法

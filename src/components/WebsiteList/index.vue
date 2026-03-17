@@ -13,7 +13,7 @@ import { Delete } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import { useWebsiteStore } from "@/stores/website";
 import { useSearchStore } from "@/stores/search";
-import defaultFavicon from "@/assets/portal.svg";
+import defaultFavicon from "@/assets/favicon.svg";
 import Draggable from "vuedraggable";
 
 const { t } = useI18n();

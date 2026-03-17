@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElLoading } from "element-plus";
 import { useWebsiteStore } from "@/stores/website";
@@ -9,6 +9,7 @@ import WebsiteList from "./components/WebsiteList/index.vue";
 
 const websiteStore = useWebsiteStore();
 const { t, locale } = useI18n();
+let timer = null;
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -55,16 +56,24 @@ onMounted(() => {
   // 初始更新
   greeting.value = getGreeting();
 
-  // 设置定时器，每分钟更新一次
-  setInterval(() => {
+  timer = setInterval(() => {
     greeting.value = getGreeting();
   }, 60000); // 60秒 = 1分钟
+});
+
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
 });
 </script>
 
 <template>
   <div class="container">
-    <Header />
+    <div class="header">
+      <Header />
+    </div>
     <h1>{{ greeting }}</h1>
     <p>{{ t("message.lyric") }}</p>
     <SearchInput />
@@ -81,21 +90,33 @@ onMounted(() => {
 .container {
   min-height: 100vh;
   width: 100%;
-}
+  padding-top: 56px;
 
-h1 {
-  text-align: center;
-  color: var(--text-color);
-  margin: 10px 0 20px;
-  font-size: clamp(16px, 5vw, 24px);
-  font-weight: 500;
-}
+  .header {
+    height: 56px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
 
-p {
-  text-align: center;
-  color: var(--text-color);
-  margin: 20px auto 40px;
-  font-size: clamp(12px, 5vw, 16px);
-  width: 90%;
+  h1 {
+    text-align: center;
+    color: var(--text-color);
+    margin: 10px 0 20px;
+    font-size: clamp(16px, 5vw, 24px);
+    font-weight: 500;
+  }
+
+  p {
+    text-align: center;
+    color: var(--text-color);
+    margin: 20px auto 40px;
+    font-size: clamp(12px, 5vw, 16px);
+    width: 90%;
+  }
 }
 </style>
